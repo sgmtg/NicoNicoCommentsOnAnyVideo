@@ -1,6 +1,6 @@
 {
-    "name": "My Extension",
-    "description": "My Extension",
+    "name": "NicoNicoCommentsOnAnyVideo",
+    "description": "任意の動画を任意のニコニコ動画のコメントと一緒に見れる拡張機能です。",
     "version": "1.0",
     "manifest_version": 3,
     "permissions": [
