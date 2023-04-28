@@ -9,7 +9,7 @@ document.getElementById("btn").addEventListener("click", function () {
             console.log(tabs);
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
-                function: displayCommentsOnMovie(commentsData),
+                function: displayCommentsOnVideo(commentsData),
             });
         });
     });
@@ -17,7 +17,7 @@ document.getElementById("btn").addEventListener("click", function () {
 });
 
 async function fectchNicoComment() {
-    var movieId = "sm40667019";
+    var videoId = "sm40667019";
     var headers1 = {
         "X-Frontend-Id": "6",
         "X-Frontend-Version": "0"
@@ -25,13 +25,13 @@ async function fectchNicoComment() {
     
     var actionTrackId = Math.random().toString(36).substring(2, 12) + "_" + Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
     
-    var url1 = "https://www.nicovideo.jp/api/watch/v3_guest/" + movieId + "?actionTrackId=" + actionTrackId;
+    var url1 = "https://www.nicovideo.jp/api/watch/v3_guest/" + videoId + "?actionTrackId=" + actionTrackId;
     console.log(url1)
     
     const response1 = await fetch(url1, { method: 'POST', headers: headers1 });
-    const movieInfo = await response1.json();
+    const videoInfo = await response1.json();
     
-    ParamsNecessaryToFetchComment = movieInfo["data"]["comment"]["nvComment"]
+    ParamsNecessaryToFetchComment = videoInfo["data"]["comment"]["nvComment"]
     console.log(ParamsNecessaryToFetchComment);
     
     const url2 = ParamsNecessaryToFetchComment["server"] + "/v1/threads"
@@ -49,8 +49,8 @@ async function fectchNicoComment() {
     const response2 = await fetch(url2, {method: 'POST', headers: headers2, body: JSON.stringify(params)});
     const commentsInfo = await response2.json();
     
-    var movieType = 1;
-    commentsData = commentsInfo['data']['threads'][movieType]['comments']
+    var videoType = 1;
+    commentsData = commentsInfo['data']['threads'][videoType]['comments']
     console.log(commentsData);
     
     // 昇順にソート
@@ -66,7 +66,7 @@ async function fectchNicoComment() {
 
 
 
-function displayCommentsOnMovie(commentsData) {
+function displayCommentsOnVideo(commentsData) {
     document.body.style.backgroundColor = "#fcc";var videoElement = document.getElementsByTagName("body")[0];//HTMLドキュメント内の最初の <video> 要素を取得
     console.log("ng");
     console.log(commentsData);
