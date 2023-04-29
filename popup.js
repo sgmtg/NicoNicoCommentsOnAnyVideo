@@ -1,21 +1,29 @@
+
+
 document.getElementById("fetch_comment").addEventListener("click", function () {
     var videoUrl = document.getElementById("video_url").value;
     var videoUrl = videoUrl.split("/");
     const videoId = videoUrl[videoUrl.length - 1]
-
-    console.log(videoId)
     
+    var message = document.getElementById("message");
+    message.innerHTML = "now loading"
+
     fectchNicoComment(videoId).then(commentsData=>{
         console.log(commentsData);
-        
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            console.log(tabs);
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
                 function: displayCommentsOnVideo,
                 args: [commentsData]
             });
         });
+    });
+    
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        var message = document.getElementById("message");
+        message.innerHTML = "successfully loaded!"
+        // HTMLの変更処理
+        sendResponse({});
     });
     
 });
@@ -81,7 +89,7 @@ async function fectchNicoComment(videoId) {
 function displayCommentsOnVideo(commentsData) {
     var videoElements = document.getElementsByTagName("video");//HTMLドキュメント内の最初の <video> 要素を取得
     var videoElement = videoElements[videoElements.length - 1]
-    console.log(commentsData);
+
 
 
     var textOverlays = [];
@@ -94,10 +102,10 @@ function displayCommentsOnVideo(commentsData) {
         textOverlay.style.top = "0%";
         textOverlay.style.transform = `translate(0%, ${100 + (i % 7) * 100}%)`;//(x%, y%)と指定すると、テキストボックス大きさを基準にして、右にx%、下にy%だけ移動する。
         textOverlay.style.display = "block";
-        textOverlay.style.zIndex = "9999";//作成した <div> 要素の CSS スタイルプロパティ z-index を "9999" に設定します。これにより、要素が他の要素の上に表示されるようになります。
+        textOverlay.style.zIndex = "9999";//作成した <div> 要素の CSS スタイルプロパティ z-index を "9999" に設定
         textOverlay.style.whitespace = "nowrap";// 要素のテキストが自動的に折り返されないようにする
         textOverlay.style.wordBreak = "keep-all";//折り返さない
-        textOverlay.style.fontSize = "3em";//要素内のテキストのフォントサイズを、親要素のフォントサイズの3倍に設定することを意味します。
+        textOverlay.style.fontSize = "3em";//要素内のテキストのフォントサイズを、親要素のフォントサイズの3倍に設定する
         textOverlay.style.color = "white";
         textOverlay.style.textShadow = "0px 0px 4px #000000";//ふちの色を黒色に設定。最初の値がX方向のずれ、2つ目の値がY方向のずれ、3つ目の値がぼかしの量、最後の値がふちの色を表します。
         videoElement.parentElement.appendChild(textOverlay);//作成した <div> 要素を <video> 要素の親要素に追加します。
@@ -105,8 +113,7 @@ function displayCommentsOnVideo(commentsData) {
         var elementWidth = textOverlay.offsetWidth;
         var parentWidth = videoElement.parentElement.offsetWidth;
         var widthPercentage = (elementWidth / parentWidth) * 100;//動画画面サイズに対するテキストボックスの横幅
-    
-        console.log(widthPercentage);
+
         textOverlays.push({
             textOverlay,
             vposMs: commentsData[i].vposMs,
@@ -118,13 +125,12 @@ function displayCommentsOnVideo(commentsData) {
     
         });
     }
-    
-    console.log(textOverlays[1])
-    console.log(textOverlays[2])
-    
-    // console.log(textOverlays[1].vposMs)
-    // console.log(textOverlays[2]["textOverlay"].innerHTML)
-    
+    chrome.runtime.sendMessage({}, function() {
+        console.log('HTML changed.');
+    });
+
+
+
     videoElement.addEventListener('loadedmetadata', function (e) {
         var time = videoElement.currentTime;
         requestAnimationFrame(function me () {
