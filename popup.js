@@ -87,8 +87,7 @@ async function fectchNicoComment(videoId) {
 
 
 function displayCommentsOnVideo(commentsData) {
-    // var videoElements = document.getElementsByTagName("video");//HTMLドキュメント内の最初の <video> 要素を取得
-    var videoElements = document.querySelectorAll('video[src^="blob:"]');
+    var videoElements = document.querySelectorAll('video[src^="blob:"]');//HTMLドキュメント内の最初の <video> 要素のひとつを取得
 
     var videoElement = videoElements[videoElements.length - 1]
 
