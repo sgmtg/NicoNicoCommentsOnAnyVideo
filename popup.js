@@ -1,5 +1,3 @@
-
-
 document.getElementById("fetch_comment").addEventListener("click", function () {
     var videoUrl = document.getElementById("video_url").value;
     var videoUrl = videoUrl.split("/");
@@ -89,7 +87,9 @@ async function fectchNicoComment(videoId) {
 
 
 function displayCommentsOnVideo(commentsData) {
-    var videoElements = document.getElementsByTagName("video");//HTMLドキュメント内の最初の <video> 要素を取得
+    // var videoElements = document.getElementsByTagName("video");//HTMLドキュメント内の最初の <video> 要素を取得
+    var videoElements = document.querySelectorAll('video[src^="blob:"]');
+
     var videoElement = videoElements[videoElements.length - 1]
 
 
