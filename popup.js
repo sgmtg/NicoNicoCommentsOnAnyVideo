@@ -7,6 +7,7 @@ document.getElementById("fetch_comment").addEventListener("click", function () {
     
     var message = document.getElementById("message");
     message.innerHTML = "now loading"
+    message.style.color = "red";
 
     fectchNicoComment(videoId).then(commentsData=>{
         console.log(commentsData);
@@ -22,6 +23,7 @@ document.getElementById("fetch_comment").addEventListener("click", function () {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var message = document.getElementById("message");
         message.innerHTML = "successfully loaded!"
+        message.style.color = "blue";
         // HTMLの変更処理
         sendResponse({});
     });
