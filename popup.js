@@ -9,7 +9,8 @@ document.getElementById("btn").addEventListener("click", function () {
             console.log(tabs);
             chrome.scripting.executeScript({
                 target: { tabId: tabs[0].id },
-                function: displayCommentsOnVideo(commentsData),
+                function: displayCommentsOnVideo,
+                args: [commentsData]
             });
         });
     });
@@ -67,10 +68,8 @@ async function fectchNicoComment() {
 
 
 function displayCommentsOnVideo(commentsData) {
-    document.body.style.backgroundColor = "#fcc";var videoElement = document.getElementsByTagName("body")[0];//HTMLドキュメント内の最初の <video> 要素を取得
-    console.log("ng");
+    var videoElement = document.getElementsByTagName("video")[0];//HTMLドキュメント内の最初の <video> 要素を取得
     console.log(commentsData);
-    console.log("ng");
 
 
     var textOverlays = [];
