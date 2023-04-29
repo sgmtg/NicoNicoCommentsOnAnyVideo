@@ -1,9 +1,12 @@
-document.getElementById("btn").addEventListener("click", function () {
+document.getElementById("fetch_comment").addEventListener("click", function () {
+    var videoUrl = document.getElementById("video_url").value;
+    var videoUrl = videoUrl.split("/");
+    const videoId = videoUrl[videoUrl.length - 1]
+
+    console.log(videoId)
     
-    fectchNicoComment().then(commentsData=>{
-        console.log("ok")
+    fectchNicoComment(videoId).then(commentsData=>{
         console.log(commentsData);
-        console.log("ok")
         
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             console.log(tabs);
@@ -17,8 +20,9 @@ document.getElementById("btn").addEventListener("click", function () {
     
 });
 
-async function fectchNicoComment() {
-    var videoId = "sm40667019";
+async function fectchNicoComment(videoId) {
+    // var videoId = "sm40667019";
+    console.log(videoId)
     var headers1 = {
         "X-Frontend-Id": "6",
         "X-Frontend-Version": "0"
@@ -31,6 +35,7 @@ async function fectchNicoComment() {
     
     const response1 = await fetch(url1, { method: 'POST', headers: headers1 });
     const videoInfo = await response1.json();
+    console.log(videoInfo);
     
     ParamsNecessaryToFetchComment = videoInfo["data"]["comment"]["nvComment"]
     console.log(ParamsNecessaryToFetchComment);
@@ -50,7 +55,13 @@ async function fectchNicoComment() {
     const response2 = await fetch(url2, {method: 'POST', headers: headers2, body: JSON.stringify(params)});
     const commentsInfo = await response2.json();
     
-    var videoType = 1;
+    
+    if(/sm/.test(videoId)){
+        var videoType = 1;
+    }else{
+        var videoType = 2;
+    }
+
     commentsData = commentsInfo['data']['threads'][videoType]['comments']
     console.log(commentsData);
     
@@ -68,7 +79,8 @@ async function fectchNicoComment() {
 
 
 function displayCommentsOnVideo(commentsData) {
-    var videoElement = document.getElementsByTagName("video")[0];//HTMLドキュメント内の最初の <video> 要素を取得
+    var videoElements = document.getElementsByTagName("video");//HTMLドキュメント内の最初の <video> 要素を取得
+    var videoElement = videoElements[videoElements.length - 1]
     console.log(commentsData);
 
 
@@ -80,15 +92,15 @@ function displayCommentsOnVideo(commentsData) {
         textOverlay.style.position = "absolute";//ブラウザウィンドウ全体を基準にした位置となる
         textOverlay.style.right = "-100%";//要素の右端と親要素の右端の距離(親要素の大きさを基準にする)
         textOverlay.style.top = "0%";
-        textOverlay.style.transform = `translate(0%, ${100 + (i % 7) * 100}%)`;//(x%, y%)と指定すると、テキストボックス大きさを基準にして、右にx%、下にy%だけ移動する。要素の中央位置を親要素の中央に合わせることができます。
+        textOverlay.style.transform = `translate(0%, ${100 + (i % 7) * 100}%)`;//(x%, y%)と指定すると、テキストボックス大きさを基準にして、右にx%、下にy%だけ移動する。
         textOverlay.style.display = "block";
         textOverlay.style.zIndex = "9999";//作成した <div> 要素の CSS スタイルプロパティ z-index を "9999" に設定します。これにより、要素が他の要素の上に表示されるようになります。
         textOverlay.style.whitespace = "nowrap";// 要素のテキストが自動的に折り返されないようにする
         textOverlay.style.wordBreak = "keep-all";//折り返さない
-        textOverlay.style.fontSize = "3em";//3em" に設定することは、要素内のテキストのフォントサイズを、親要素のフォントサイズの3倍に設定することを意味します。
+        textOverlay.style.fontSize = "3em";//要素内のテキストのフォントサイズを、親要素のフォントサイズの3倍に設定することを意味します。
         textOverlay.style.color = "white";
         textOverlay.style.textShadow = "0px 0px 4px #000000";//ふちの色を黒色に設定。最初の値がX方向のずれ、2つ目の値がY方向のずれ、3つ目の値がぼかしの量、最後の値がふちの色を表します。
-        videoElement.parentElement.appendChild(textOverlay);//作成した <div> 要素を <video> 要素の親要素に追加します。これにより、ビデオの上にテキストが表示されるようになります。
+        videoElement.parentElement.appendChild(textOverlay);//作成した <div> 要素を <video> 要素の親要素に追加します。
     
         var elementWidth = textOverlay.offsetWidth;
         var parentWidth = videoElement.parentElement.offsetWidth;
@@ -113,16 +125,12 @@ function displayCommentsOnVideo(commentsData) {
     // console.log(textOverlays[1].vposMs)
     // console.log(textOverlays[2]["textOverlay"].innerHTML)
     
-    
-    
-    // このコードは、HTML5 ビデオプレーヤーの再生中に、ビデオの現在の時間を常に監視するために使用されます。loadedmetadata イベントが発生したときに、ビデオの現在の時間を変数に設定し、requestAnimationFrame（）を使用して連続的に時間を監視します。
-    // その後、再帰的に呼び出される関数me() は、現在の時間が以前の時間と異なる場合に、ビデオが時間を更新したことを示すtimeupdate イベントを発行します。そして、再度 requestAnimationFrame（）を呼び出し、次のフレームで同じプロセスを繰り返します。
-    // このコードは、ビデオの再生中に特定のアクションを実行する必要がある場合に便利です。例えば、ビデオが再生されている間にビデオの時間を更新して、進行状況バーを更新したり、キャプションを表示したりすることができます。
     videoElement.addEventListener('loadedmetadata', function (e) {
         var time = videoElement.currentTime;
         requestAnimationFrame(function me () {
             if (time !== videoElement.currentTime) {
                 time = videoElement.currentTime;
+                //イベントリスナーを同期的に起動
                 videoElement.dispatchEvent(new CustomEvent("timeupdate"));
             }
             requestAnimationFrame(me);
